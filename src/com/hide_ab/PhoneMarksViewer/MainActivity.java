@@ -14,20 +14,27 @@ import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.util.Xml;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +51,12 @@ import com.google.api.client.xml.XmlNamespaceDictionary;
 import com.google.api.client.xml.atom.AtomParser;
 
 public class MainActivity extends Activity {
+	//Handlerのインスタンス生成
+	Handler mHandler = new Handler();
+
+	// メニューアイテムID
+	private static final int MENU_ITEM0 = 0;
+
 	private static final String GOOGLE_DOCS_API_URL = "https://docs.google.com/feeds/";
 	private static final String DOCS_AUTH_TOKEN_TYPE = "writely";
 	private static final String TAG = "GoogleDocsTest";
@@ -55,7 +68,10 @@ public class MainActivity extends Activity {
 	protected DatabaseHelper DBHelper = new DatabaseHelper(this);
 	// 認証のためのauth token
 	private String authToken = "";
-    private static HttpTransport transport;
+	private static HttpTransport transport;
+
+	private String Parent;
+	private ProgressDialog progressDialog;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -70,13 +86,18 @@ public class MainActivity extends Activity {
 		// データベースオブジェクトの取得
 		this.DBHelper = new DatabaseHelper(this);
 
-		// GoogleDocからPhoneMarksの詳細URLを取得する
-		String ItemUrl = this.GetBookmarkURL();
-		// ブックマーク情報登録
-		this.CreateBookmark(ItemUrl);
+		try {
+			// 呼び出し元からパラメータ取得
+			Intent intent = getIntent();
+			Parent = intent.getStringExtra("Parent");
+		} catch (Exception e) {
+			Parent = null;
+		}
+		if(Parent == null)
+			Parent = "";
 
 		// ブックマーク一覧表示
-		this.DrawBookmarks("");
+		this.DrawBookmarks(Parent);
 	}
 
 	// GoogleDocからPhoneMarksの詳細URLを取得する
@@ -300,8 +321,11 @@ public class MainActivity extends Activity {
 					} else {
 						Parent = Parent + linkInfo.getTitle() + ",";
 					}
-					// ブックマーク一覧表示
-					DrawBookmarks(Parent);
+
+					// 下階層のリスト画面を表示
+					Intent intent = new Intent(MainActivity.this, MainActivity.class);
+					intent.putExtra("Parent", Parent);
+					startActivity(intent);
 				}
 				// クリック箇所がURLならブラウザ起動
 				else {
@@ -357,9 +381,17 @@ public class MainActivity extends Activity {
 					image_photo.setImageBitmap(Photo);
 				}
 */
-				TextView tvTitle = (TextView)view.findViewById(R.id.Title);
+				TextView tvTitle = (TextView)view.findViewById(R.id.TvTitle);
 				if(tvTitle != null) {
 					tvTitle.setText(linkInfo.getTitle());
+				}
+				TextView tvUrl = (TextView)view.findViewById(R.id.TvUrl);
+				if(tvUrl != null) {
+					tvUrl.setText(linkInfo.getUrl());
+				}
+				ImageView ivIcon = (ImageView)view.findViewById(R.id.IvIcon);
+				if(ivIcon != null) {
+					ivIcon.setImageResource(android.R.drawable.ic_menu_delete);
 				}
 			}
 			return view;
@@ -383,5 +415,69 @@ public class MainActivity extends Activity {
 		else {
 			e.printStackTrace();
 		}
+	}
+
+	//
+	// 更新メニュー
+	//
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+
+		MenuItem item0 = menu.add(Menu.NONE, MENU_ITEM0, Menu.NONE, "更新");
+		item0.setIcon(android.R.drawable.ic_menu_more);
+
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// ダイアログを表示
+		this.progressDialog = new ProgressDialog(this);
+		this.progressDialog.setTitle("タイトル");
+		this.progressDialog.setMessage("処理を実行中です...");
+		this.progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		this.progressDialog.setCancelable(true);
+		this.progressDialog.show();
+
+		switch(item.getItemId()) {
+			case MENU_ITEM0:
+				// DB Open
+				SQLiteDatabase Db = this.DBHelper.getWritableDatabase();
+				// 一旦クリアする
+				Db.delete("Bookmarks", "", null);
+				// ブックマーク一覧表示
+				this.DrawBookmarks(this.Parent);
+
+				// スレッドを起動してバックグラウンドで更新処理
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try{
+							Thread.sleep(10000);
+						} catch (InterruptedException e) {
+						}
+
+						// GoogleDocからPhoneMarksの詳細URLを取得する
+						String ItemUrl = MainActivity.this.GetBookmarkURL();
+						// ブックマーク情報登録
+						MainActivity.this.CreateBookmark(ItemUrl);
+
+						// Handlerのpostメソッドを使ってUIスレッドに処理をdispatchします
+						mHandler.post(new Runnable() {
+							@Override
+							public void run() {
+								// ブックマーク一覧表示
+								MainActivity.this.DrawBookmarks(MainActivity.this.Parent);
+
+								// 実際に行いたい処理が終わったらダイアログを消去
+								progressDialog.dismiss();
+							}
+						});
+					}
+				}).start();
+				break;
+		}
+		return true;
 	}
 }
