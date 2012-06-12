@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="hello">Hello World, MainActivity!</string>
 	<string name="app_name">PhoneMarks Viewer</string>
+	<string name="menu_renew">更新</string>
+	<string name="dialog_renew_title">更新中</string>
+	<string name="dialog_renew_message">ブックマークを更新中です...</string>
+	<string name="toast_cacheclear">キャッシュを削除しました。アプリを再起動してください。</string>
 
 	<color name="bg_color">#FFFFFF</color>
 	<color name="text_color">#000000</color>

@@ -18,6 +18,7 @@ import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -51,8 +52,10 @@ import com.google.api.client.xml.XmlNamespaceDictionary;
 import com.google.api.client.xml.atom.AtomParser;
 
 public class MainActivity extends Activity {
+	private Resources res;
+
 	//Handlerのインスタンス生成
-	Handler mHandler = new Handler();
+	private Handler mHandler = new Handler();
 
 	// メニューアイテムID
 	private static final int MENU_ITEM0 = 0;
@@ -77,6 +80,8 @@ public class MainActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		res = getResources();
 
 		// 画面構成を適用
 		setContentView(R.layout.main);
@@ -224,7 +229,7 @@ public class MainActivity extends Activity {
 							// URL登録
 							ContentValues values = new ContentValues();
 							values.put("no", no);
-							values.put("foru", 2);
+							values.put("foru", LinkInfo.ITEM_SITE);
 							values.put("folder", parser.getAttributeValue(null, "folder"));
 							values.put("title", parser.getAttributeValue(null, "title"));
 							values.put("url", parser.getAttributeValue(null, "url"));
@@ -258,7 +263,7 @@ public class MainActivity extends Activity {
 					else {
 						ContentValues values = new ContentValues();
 						values.put("no", no);
-						values.put("foru", 1);
+						values.put("foru", LinkInfo.ITEM_FOLDER);
 						values.put("folder", Parent);
 						values.put("title", strAry[i]);
 						values.put("url", "");
@@ -314,7 +319,7 @@ public class MainActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) { 
 				LinkInfo linkInfo = (LinkInfo)List.get(position);
 				// クリック箇所がフォルダなら階層移動
-				if(linkInfo.getForU() == 1) {
+				if(linkInfo.getForU() == LinkInfo.ITEM_FOLDER) {
 					String Parent = linkInfo.getFolder();
 					if(Parent.equals("")) {
 						Parent = linkInfo.getTitle() + ",";
@@ -364,36 +369,24 @@ public class MainActivity extends Activity {
 			// 表示すべきデータの取得
 			LinkInfo linkInfo = (LinkInfo)List.get(position);
 			if(linkInfo != null) {
-/*
-				// スクリーンネームをビューにセット
-				ImageView image_photo = (ImageView)view.findViewById(R.id.image_photo);
-				if(image_photo != null) {
-					Bitmap Photo = shopInfo.getPhoto();
-					if(Photo == null) {
-						Photo = shopinfos.getDefaultPhoto();
-						// 画像取得タスクが走っていなければ
-						if(!shopInfo.getPhotoGetTask()) {
-							// バックグラウンドで画像を取得
-							PhotoGetTask task = new PhotoGetTask(shopInfo);
-							task.execute("");
-						}
-					}
-					image_photo.setImageBitmap(Photo);
-				}
-*/
+				// サイト名
 				TextView tvTitle = (TextView)view.findViewById(R.id.TvTitle);
 				if(tvTitle != null) {
 					tvTitle.setText(linkInfo.getTitle());
 				}
+				// URL
 				TextView tvUrl = (TextView)view.findViewById(R.id.TvUrl);
 				if(tvUrl != null) {
 					tvUrl.setText(linkInfo.getUrl());
 				}
+				// アイコン
 				ImageView ivIcon = (ImageView)view.findViewById(R.id.IvIcon);
 				if(ivIcon != null) {
-					if(linkInfo.getForU() == 1) {
+					// フォルダアイコン
+					if(linkInfo.getForU() == LinkInfo.ITEM_FOLDER) {
 						ivIcon.setImageResource(R.drawable.folder);
 					}
+					// サイトアイコン
 					else {
 						ivIcon.setImageResource(android.R.drawable.ic_menu_more);
 					}
@@ -412,7 +405,7 @@ public class MainActivity extends Activity {
 				// キャッシュを削除
 				manager.invalidateAuthToken("com.google", authToken);
 				Toast.makeText(getApplicationContext(),
-							"キャッシュを削除しました。アプリを再起動してください。",
+							res.getString(R.string.toast_cacheclear),
 							Toast.LENGTH_LONG).show();
 			}
 			return;
@@ -429,8 +422,8 @@ public class MainActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 
-		MenuItem item0 = menu.add(Menu.NONE, MENU_ITEM0, Menu.NONE, "更新");
-		item0.setIcon(android.R.drawable.ic_menu_more);
+		MenuItem item0 = menu.add(Menu.NONE, MENU_ITEM0, Menu.NONE, res.getString(R.string.menu_renew));
+		item0.setIcon(android.R.drawable.ic_menu_rotate);
 
 		return true;
 	}
@@ -439,8 +432,8 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// ダイアログを表示
 		this.progressDialog = new ProgressDialog(this);
-		this.progressDialog.setTitle("タイトル");
-		this.progressDialog.setMessage("処理を実行中です...");
+		this.progressDialog.setTitle(res.getString(R.string.dialog_renew_title));
+		this.progressDialog.setMessage(res.getString(R.string.dialog_renew_message));
 		this.progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		this.progressDialog.setCancelable(true);
 		this.progressDialog.show();
