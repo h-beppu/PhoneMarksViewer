@@ -2,4 +2,8 @@
 <resources>
     <string name="hello">Hello World, MainActivity!</string>
     <string name="app_name">PhoneMarks Viewer</string>
+
+    <color name="bgcolor">#FFFFFF</color>
+    <color name="row_bgcolor">#FFFFFF</color>
+    <color name="text1_color">#000000</color>
 </resources>

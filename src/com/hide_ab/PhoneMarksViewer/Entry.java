@@ -14,7 +14,4 @@ public class Entry {
 
     @Key
     public DateTime updated;
-    
-    @Key
-    public List<Link> link;
 }
