@@ -1,12 +1,16 @@
 package com.hide_ab.PhoneMarksViewer;
 
 public class LinkInfo {
-	private String ParentFolder;
+	private int ForU;
+	private String Folder;
 	private String Title;
 	private String Url;
 
-	public String getParentFolder() {
-		return this.ParentFolder;
+	public int getForU() {
+		return this.ForU;
+	}
+	public String getFolder() {
+		return this.Folder;
 	}
 	public String getTitle() {
 		return this.Title;
@@ -15,8 +19,11 @@ public class LinkInfo {
 		return this.Url;
 	}
 
-	public void setParentFolder(String ParentFolder) {
-		this.ParentFolder = ParentFolder;
+	public void setForU(int ForU) {
+		this.ForU = ForU;
+	}
+	public void setFolder(String Folder) {
+		this.Folder = Folder;
 	}
 	public void setTitle(String Title) {
 		this.Title = Title;
