@@ -13,13 +13,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.api.client.googleapis.GoogleHeaders;
 import com.google.api.client.googleapis.GoogleTransport;
 import com.google.api.client.googleapis.GoogleUrl;
 import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.util.DateTime;
 import com.google.api.client.util.Key;
 import com.google.api.client.xml.XmlNamespaceDictionary;
 import com.google.api.client.xml.atom.AtomParser;
@@ -31,6 +34,8 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 画面構成を適用
         setContentView(R.layout.main);
 
         // AccountManagerを通じてGoogleアカウントを取得
@@ -73,7 +78,7 @@ public class MainActivity extends Activity {
 
         // 送信準備
         HttpTransport transport = GoogleTransport.create();
-        GoogleHeaders headers = (GoogleHeaders) transport.defaultHeaders;
+        GoogleHeaders headers = (GoogleHeaders)transport.defaultHeaders;
         headers.setApplicationName("Kokufu-GoogleDocsTest/1.0");
         headers.gdataVersion = "3";
         headers.setGoogleLogin(authToken); // 認証トークン設定
@@ -90,45 +95,44 @@ public class MainActivity extends Activity {
             HttpRequest request = transport.buildGetRequest();
             request.url = new GoogleUrl("https://docs.google.com/feeds/default/private/full"); // ※2 
 			feed = request.execute().parseAs(Feed.class);
+/*
+            HttpResponse response = request.execute();
+            TextView text1 = (TextView)findViewById(R.id.text1);
+    		String a = response.parseAsString();
+            text1.setText(a);
+			feed = response.parseAs(Feed.class);
+*/
 		} catch (IOException e) {
+            TextView text1 = (TextView)findViewById(R.id.text1);
+    		text1.setText(e.toString());
             Log.e(TAG, "", e);
             return;
         }
 
-/*
-        // 結果を表示
-        String tmp = "abcdefghijklmnopqrstuvwxyz";
-        for(Entry entry : feed.entries) {
-            tmp += entry.title + "\n";
+        String tmp = "";
+        String Items = "";
+        for(Entry entry : feed.entry) {
+            for(Content content : entry.content) {
+            	try {
+                	tmp += entry.title + " - " + content.src + "\n\n";
+
+                	HttpRequest request = transport.buildGetRequest();
+                	request.url = new GoogleUrl(content.src + "&format=txt");
+
+        			HttpResponse response = request.execute();
+        			Items = response.parseAsString();
+        		} catch (IOException e) {
+        			TextView text1 = (TextView)findViewById(R.id.text1);
+        			tmp += e.toString();
+        			text1.setText(tmp);
+        			Log.e(TAG, "", e);
+        			return;
+        		}
+            }
         }
-        TextView v = new TextView(this);
-        v.setText(tmp);
-        this.addContentView(
-                v,
-                new LayoutParams(LayoutParams.WRAP_CONTENT,
-                                 LayoutParams.WRAP_CONTENT));
-*/
+
+        // 結果を表示
+        TextView text1 = (TextView)findViewById(R.id.text1);
+        text1.setText(tmp + Items);
     }
-
-    /**
-     * Feedタグ
-     */
-    private class Feed {
-        @Key("entry")
-        public List<Entry> entries = new ArrayList();
-    }
-
-    /**
-     * Entryタグ
-     */
-    private class Entry {
-        @Key
-        public String summary;
-
-        @Key
-        public String title;
-
-        @Key
-        public String updated;
-	}
 }
