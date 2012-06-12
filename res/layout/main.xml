@@ -3,9 +3,8 @@
 	android:orientation="vertical"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
-	>
+	android:background="@color/bg_color">
 	<ListView
-		android:listSelector="@xml/list_selector"
 		android:id="@+id/listview_results"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent" />

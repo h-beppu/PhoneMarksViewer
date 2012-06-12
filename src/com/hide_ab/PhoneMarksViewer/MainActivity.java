@@ -391,7 +391,12 @@ public class MainActivity extends Activity {
 				}
 				ImageView ivIcon = (ImageView)view.findViewById(R.id.IvIcon);
 				if(ivIcon != null) {
-					ivIcon.setImageResource(android.R.drawable.ic_menu_delete);
+					if(linkInfo.getForU() == 1) {
+						ivIcon.setImageResource(R.drawable.folder);
+					}
+					else {
+						ivIcon.setImageResource(android.R.drawable.ic_menu_more);
+					}
 				}
 			}
 			return view;

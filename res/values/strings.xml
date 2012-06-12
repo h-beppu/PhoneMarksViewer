@@ -3,8 +3,8 @@
 	<string name="hello">Hello World, MainActivity!</string>
 	<string name="app_name">PhoneMarks Viewer</string>
 
-	<color name="bgcolor">#FFFFFF</color>
-	<color name="row_bgcolor">#FFFFFF</color>
-	<color name="text1_color">#000000</color>
-	<color name="testbgcolor">#409040</color>
+	<color name="bg_color">#FFFFFF</color>
+	<color name="text_color">#000000</color>
+	<color name="bg_color_rev">#000000</color>
+	<color name="text_color_rev">#FFFFFF</color>
 </resources>

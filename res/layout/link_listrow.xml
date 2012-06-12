@@ -4,7 +4,7 @@
 	android:layout_width="fill_parent"
 	android:layout_height="?android:attr/listPreferredItemHeight"
 	android:padding="6dip"
-	android:background="@color/row_bgcolor">
+	android:background="@color/listrow">
 		<ImageView
 			android:id="@+id/IvIcon"
 			android:layout_width="wrap_content"
@@ -20,15 +20,15 @@
 				android:id="@+id/TvTitle"
 				android:layout_width="fill_parent"
 				android:layout_height="22dip"
-				android:textColor="@color/text1_color"
 				android:textSize="16sp"
+				android:textColor="@color/listrow"
 				android:gravity="center_vertical"/>
 			<TextView
 				android:id="@+id/TvUrl"
 				android:layout_width="fill_parent"
 				android:layout_height="16dip"
-				android:textColor="@color/text1_color"
 				android:textSize="12sp"
+				android:textColor="@color/listrow"
 				android:gravity="center_vertical"/>
 		</LinearLayout>
 </LinearLayout>
