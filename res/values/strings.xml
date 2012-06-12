@@ -10,4 +10,6 @@
 	<color name="text_color">#000000</color>
 	<color name="bg_color_rev">#000000</color>
 	<color name="text_color_rev">#FFFFFF</color>
+
+	<string name="activity_animation_duration">150</string>
 </resources>
